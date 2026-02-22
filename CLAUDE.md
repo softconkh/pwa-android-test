@@ -2,6 +2,8 @@
 
 Interaktive Progressive Web App zum Erkunden und Testen moderner Browser-APIs.
 
+**Live Demo:** https://softconkh.github.io/pwa-android-test/
+
 ## Tech Stack
 
 - Vanilla HTML/CSS/JS — kein Framework, keine Build-Tools
