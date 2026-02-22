@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6C3CE1">
+  <meta name="description" content="Interaktive PWA-Spielwiese zum Erkunden von Browser-APIs und PWA-Features">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>PWA Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <img src="icons/icon.svg" alt="PWA Playground" class="header__icon">
+    <h1>PWA Playground</h1>
+    <p>Deine Spielwiese für moderne Web-APIs</p>
+  </header>
+
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner">
+    <button id="installBtn" class="btn btn--primary">
+      <span>📲</span> App installieren
+    </button>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-pill">
+      <span class="status-dot" id="onlineDot"></span>
+      <span id="onlineText">Prüfe...</span>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot" id="swDot"></span>
+      <span id="swText">Service Worker</span>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot" id="modeDot"></span>
+      <span id="modeText">Browser</span>
+    </div>
+  </div>
+
+  <!-- Feature Grid -->
+  <main class="grid">
+
+    <!-- 1. QR Code Scanner -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">📷</div>
+        <h2 class="card__title">QR-Code Scanner</h2>
+      </div>
+      <div class="card__api-badge">MediaDevices API + html5-qrcode</div>
+      <p class="card__desc">Scanne QR-Codes mit deiner Kamera in Echtzeit.</p>
+      <div id="qr-reader"></div>
+      <div class="btn-row">
+        <button class="btn btn--primary" id="qrStartBtn">Scanner starten</button>
+        <button class="btn btn--danger hidden" id="qrStopBtn">Stoppen</button>
+      </div>
+      <div class="output" id="qrOutput"></div>
+    </section>
+
+    <!-- 2. Geolocation -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">📍</div>
+        <h2 class="card__title">Geolocation</h2>
+      </div>
+      <div class="card__api-badge">Geolocation API</div>
+      <p class="card__desc">Ermittle deinen aktuellen Standort per GPS.</p>
+      <button class="btn btn--primary" id="geoBtn">Position abrufen</button>
+      <div class="output" id="geoOutput"></div>
+    </section>
+
+    <!-- 3. Device Motion -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🔄</div>
+        <h2 class="card__title">Device Motion</h2>
+      </div>
+      <div class="card__api-badge">DeviceOrientation API</div>
+      <p class="card__desc">Drehe dein Gerät und beobachte den 3D-Würfel.</p>
+      <div class="cube-scene">
+        <div class="cube" id="cube">
+          <div class="cube__face cube__face--front">Front</div>
+          <div class="cube__face cube__face--back">Back</div>
+          <div class="cube__face cube__face--right">Right</div>
+          <div class="cube__face cube__face--left">Left</div>
+          <div class="cube__face cube__face--top">Top</div>
+          <div class="cube__face cube__face--bottom">Bottom</div>
+        </div>
+      </div>
+      <button class="btn" id="motionBtn">Sensor aktivieren</button>
+      <div class="output" id="motionOutput"></div>
+    </section>
+
+    <!-- 4. Kamera & Foto -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🤳</div>
+        <h2 class="card__title">Kamera & Foto</h2>
+      </div>
+      <div class="card__api-badge">getUserMedia + Canvas</div>
+      <p class="card__desc">Mach ein Foto mit deiner Kamera und speichere es.</p>
+      <video class="camera-preview" id="cameraPreview" autoplay playsinline></video>
+      <canvas class="hidden" id="cameraCanvas"></canvas>
+      <img class="photo-result" id="photoResult" alt="Aufgenommenes Foto">
+      <div class="btn-row">
+        <button class="btn btn--primary" id="cameraStartBtn">Kamera öffnen</button>
+        <button class="btn hidden" id="cameraSnapBtn">📸 Foto!</button>
+        <button class="btn hidden" id="cameraDownloadBtn">💾 Speichern</button>
+      </div>
+    </section>
+
+    <!-- 5. Vibration -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">📳</div>
+        <h2 class="card__title">Vibration</h2>
+      </div>
+      <div class="card__api-badge">Vibration API</div>
+      <p class="card__desc">Teste verschiedene Vibrationsmuster auf deinem Gerät.</p>
+      <div class="btn-row">
+        <button class="btn" onclick="PWA.vibrate('short')">Kurz</button>
+        <button class="btn" onclick="PWA.vibrate('long')">Lang</button>
+        <button class="btn" onclick="PWA.vibrate('sos')">SOS</button>
+        <button class="btn" onclick="PWA.vibrate('heartbeat')">Heartbeat</button>
+      </div>
+      <div class="vib-viz" id="vibViz"></div>
+    </section>
+
+    <!-- 6. Notifications -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🔔</div>
+        <h2 class="card__title">Notifications</h2>
+      </div>
+      <div class="card__api-badge">Notification API</div>
+      <p class="card__desc">Sende dir eine lokale Benachrichtigung.</p>
+      <input class="input" id="notifInput" type="text" placeholder="Nachricht eingeben...">
+      <div class="btn-row">
+        <button class="btn btn--primary" id="notifBtn">Notification senden</button>
+      </div>
+      <div class="output" id="notifOutput"></div>
+    </section>
+
+    <!-- 7. Share API -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🔗</div>
+        <h2 class="card__title">Share API</h2>
+      </div>
+      <div class="card__api-badge">Web Share API</div>
+      <p class="card__desc">Nutze den nativen Teilen-Dialog deines Geräts.</p>
+      <input class="input" id="shareInput" type="text" placeholder="Text zum Teilen..." value="Schau dir die PWA Playground an!">
+      <button class="btn btn--primary" id="shareBtn">Teilen</button>
+      <div class="output" id="shareOutput"></div>
+    </section>
+
+    <!-- 8. Clipboard -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">📋</div>
+        <h2 class="card__title">Clipboard</h2>
+      </div>
+      <div class="card__api-badge">Clipboard API</div>
+      <p class="card__desc">Kopiere Text in die Zwischenablage oder lese daraus.</p>
+      <input class="input" id="clipInput" type="text" placeholder="Text eingeben...">
+      <div class="btn-row">
+        <button class="btn btn--primary" id="clipCopyBtn">Kopieren</button>
+        <button class="btn" id="clipPasteBtn">Einfügen</button>
+      </div>
+      <div class="output" id="clipOutput"></div>
+    </section>
+
+    <!-- 9. Speech -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🎙️</div>
+        <h2 class="card__title">Speech</h2>
+      </div>
+      <div class="card__api-badge">SpeechSynthesis + SpeechRecognition</div>
+      <p class="card__desc">Text vorlesen oder Sprache in Text umwandeln.</p>
+      <input class="input" id="ttsInput" type="text" placeholder="Text zum Vorlesen..." value="Hallo, ich bin eine Progressive Web App!">
+      <div class="speech-wave" id="speechWave">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--primary" id="ttsBtn">🔊 Vorlesen</button>
+        <button class="btn" id="sttBtn">🎤 Zuhören</button>
+      </div>
+      <div class="output" id="speechOutput"></div>
+    </section>
+
+    <!-- 10. Network Status -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🌐</div>
+        <h2 class="card__title">Netzwerk-Status</h2>
+      </div>
+      <div class="card__api-badge">NetworkInformation API</div>
+      <p class="card__desc">Überwache deinen Verbindungsstatus in Echtzeit.</p>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:0.5rem 0;">
+        <div class="network-bar" id="networkBar">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <span id="networkType" style="font-weight:600;"></span>
+      </div>
+      <div class="output" id="networkOutput"></div>
+    </section>
+
+    <!-- 11. Battery -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">🔋</div>
+        <h2 class="card__title">Battery Status</h2>
+      </div>
+      <div class="card__api-badge">Battery Status API</div>
+      <p class="card__desc">Zeige den Akku-Status deines Geräts an.</p>
+      <div class="battery-visual">
+        <div class="battery-shell">
+          <div class="battery-level" id="batteryLevel"></div>
+        </div>
+        <span class="battery-text" id="batteryText">--%</span>
+      </div>
+      <div class="output" id="batteryOutput"></div>
+    </section>
+
+    <!-- 12. Offline / Service Worker -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">⚡</div>
+        <h2 class="card__title">Offline & Cache</h2>
+      </div>
+      <div class="card__api-badge">Service Worker + Cache API</div>
+      <p class="card__desc">Service Worker Status und Cache-Verwaltung.</p>
+      <div class="btn-row">
+        <button class="btn" id="cacheListBtn">Cache anzeigen</button>
+        <button class="btn btn--danger" id="cacheClearBtn">Cache leeren</button>
+      </div>
+      <ul class="cache-list" id="cacheList"></ul>
+      <div class="output" id="cacheOutput"></div>
+    </section>
+
+    <!-- 13. Device Info -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__emoji">📱</div>
+        <h2 class="card__title">Device Info</h2>
+      </div>
+      <div class="card__api-badge">Navigator + Screen API</div>
+      <p class="card__desc">Informationen über dein Gerät und den Browser.</p>
+      <div class="output" id="deviceOutput" style="min-height:auto;"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    PWA Playground &mdash; Built with Web APIs
+  </footer>
+
+  <!-- QR Code Scanner Library (CDN) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>
